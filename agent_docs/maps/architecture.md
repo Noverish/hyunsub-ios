@@ -26,9 +26,15 @@ CLLocationManager (significant changes, 백그라운드)
       → TimelineCreateParams(timestamp(ms), lat, lng, altitude, speed, course, accuracy...)
           (음수 정확도/속도는 nil 처리)
       → TimelineAPI.shared.sendTimeline(params)
-          → PUT https://timeline.hyunsub.kim/api/v1/timelines/{timestamp}
-             Cookie: HYUNSUB_TOKEN=<token>   (현재 하드코딩 — gotchas 참조)
+          → PUT https://timeline.hyunsub.kim/api/v1/device/timelines/{timestamp}
+             Authorization: Bearer <기기 키>   (Keychain, 없으면 전송 생략 — gotchas 참조)
 ```
+
+## 기기 키 등록 (웹뷰 → 네이티브)
+
+timeline 웹(`/device`)이 키를 발급받아 `window.webkit.messageHandlers.hyunsubDeviceKey.postMessage(key)`로 넘기면
+`DeviceKeyMessageHandler`(ContentView.swift)가 **https://timeline.hyunsub.kim 메인 프레임에서 온 메시지만** 받아 `DeviceKeyStore`(Keychain,
+`AfterFirstUnlockThisDeviceOnly`)에 저장한다. 서버는 키의 SHA-256만 보관하고, 키로는 위치 저장(PUT)만 할 수 있다.
 
 권한 변경 시(`locationManagerDidChangeAuthorization`) Always/WhenInUse면 모니터링을 (재)시작한다.
 
