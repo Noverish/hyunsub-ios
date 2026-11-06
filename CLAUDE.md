@@ -9,7 +9,7 @@ Hyunsub의 **iOS 앱** (SwiftUI). 두 가지 일을 한다: (1) `apps.hyunsub.ki
 | 알고 싶은 것 | 문서 |
 |---|---|
 | 앱 실행 흐름·두 책임(WebView/위치)·데이터 흐름 | [agent_docs/maps/architecture.md](agent_docs/maps/architecture.md) |
-| 런타임 함정(하드코딩 토큰·ATS·백그라운드 위치·scheme) | [agent_docs/maps/gotchas.md](agent_docs/maps/gotchas.md) |
+| 런타임 함정(위치 업로드 기기 키·ATS·백그라운드 위치·scheme) | [agent_docs/maps/gotchas.md](agent_docs/maps/gotchas.md) |
 | 빌드/서명/권한 설정값 | [agent_docs/specs/build-and-signing.md](agent_docs/specs/build-and-signing.md) |
 
 ## Directory Structure
@@ -66,7 +66,7 @@ xcodebuild -project apps.xcodeproj -scheme apps -destination 'platform=iOS Simul
 
 ## Key Rules
 
-1. **시크릿을 소스에 하드코딩하지 않는다.** 현재 `TimelineAPI.swift`에 장수명 토큰이 하드코딩되어 있다 — 신규 코드에서 이 패턴을 따르지 말 것. ([.claude/rules/networking.md](.claude/rules/networking.md), [agent_docs/maps/gotchas.md](agent_docs/maps/gotchas.md))
+1. **시크릿을 소스에 하드코딩하지 않는다.** 위치 업로드 인증은 Keychain의 기기 키(`DeviceKeyStore`)를 쓴다 — 토큰을 소스 상수로 두지 말 것. ([.claude/rules/networking.md](.claude/rules/networking.md), [agent_docs/maps/gotchas.md](agent_docs/maps/gotchas.md))
 2. **위치 권한/백그라운드 전제**: significant-change 모니터링과 백그라운드 위치는 `Info.plist`(권한 문구 + `UIBackgroundModes: location`)와 "Always" 권한에 의존한다. 권한 흐름을 깨지 말 것.
 3. <!-- TODO: 도메인 규칙 — 위치 전송 빈도/배터리 정책, 오프라인 시 버퍼링/재전송 여부, WebView↔네이티브 브리지(JS) 사용 여부 -->
 

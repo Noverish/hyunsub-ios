@@ -10,7 +10,7 @@ API 클라이언트는 `*API.swift` 싱글톤으로 작성한다(예: `TimelineA
 ## 패턴
 
 - 요청/응답 모델은 `Codable` 구조체. 인코딩 `JSONEncoder`, `URLSession.shared.dataTask`.
-- base URL은 `https://<service>.hyunsub.kim/api/...`. 인증은 쿠키 헤더 `Cookie: HYUNSUB_TOKEN=<token>`.
+- base URL은 `https://<service>.hyunsub.kim/api/...`. 위치 업로드(`/api/v1/device/timelines/...`)는 `Authorization: Bearer <기기 키>`, 그 밖 API는 쿠키 `HYUNSUB_TOKEN`.
 - 실패/상태코드/응답은 `Logger.log(...)`로 남긴다.
 
 ```swift
@@ -31,8 +31,8 @@ class TimelineAPI {
 
 ## ⚠️ 시크릿
 
-- **토큰/자격증명을 소스에 하드코딩하지 않는다.** `TimelineAPI.swift`에는 현재 장수명 admin 토큰이 박혀 있다(레거시) — **이 패턴을 복사하지 말 것**.
-- 신규 토큰은 Keychain 저장 또는 로그인 흐름으로 주입한다.
+- **토큰/자격증명을 소스에 하드코딩하지 않는다.** 위치 업로드는 Keychain의 기기 키(`DeviceKeyStore`)를 `Authorization: Bearer`로 보낸다.
+- 신규 토큰도 Keychain 저장 또는 웹뷰 브리지/로그인 흐름으로 주입한다.
 
 ❌ Bad
 ```swift
@@ -40,7 +40,7 @@ private let token = "eyJhbG..."   // ❌ 소스/깃 히스토리에 시크릿 �
 ```
 ✅ Good — Keychain 등에서 주입
 ```swift
-guard let token = TokenStore.shared.current else { return }
+guard let key = DeviceKeyStore.shared.load() else { return }
 ```
 **Why:** 소스에 박힌 토큰은 깃 히스토리·바이너리에서 추출 가능하고, 폐기/회전이 불가능하다.
 

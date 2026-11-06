@@ -21,12 +21,16 @@ struct TimelineCreateParams: Codable {
 class TimelineAPI {
     static let shared = TimelineAPI()
 
-    private let baseURL = "https://timeline.hyunsub.kim/api/v1/timelines"
-    private let token = "eyJhbGciOiJFUzUxMiJ9.eyJleHAiOjIwODE1NTg3MTMsInBheWxvYWQiOiJ7XCJpZE5vXCI6XCIwMDAwMFwiLFwidXNlcm5hbWVcIjpcImFkbWluXCIsXCJhdXRob3JpdGllc1wiOltcImFkbWluXCIsXCJ2aWRlb1wiLFwidmlkZW9fbm9ybWFsXCIsXCJwaG90b1wiLFwiYXBwYXJlbFwiLFwiZHJpdmVcIixcImNvbWljXCIsXCJlbmNvZGVcIixcImRpYXJ5XCIsXCJnaXRcIixcImZyaWVuZFwiLFwiZHV0Y2hcIixcImdlbmV0aWNcIixcImFyY2hpdmVcIixcInRpbWVsaW5lXCJdfSJ9.AIvpSbhY7PuAyFUCB-92CCnZbf_60zwqKcKx8z4sTu4D42S1eoF3JX3FDrdi9Rt4C6SXZmbAtJcx9Xnc1YzWaRSvASaBcvaukjU2nuJ1Gfw1cQKHCSpDKumHvoQRmhuG1g8YnCdiSLNB0AryM3HmSwNzWor5uhQ5TGggNpTA0qLD7iNr"
+    private let baseURL = "https://timeline.hyunsub.kim/api/v1/device/timelines"
 
     private init() {}
 
     func sendTimeline(params: TimelineCreateParams) {
+        guard let deviceKey = DeviceKeyStore.shared.load() else {
+            Logger.log("Device key not registered — skip sending (timeline 웹의 '위치 기록 기기'에서 등록)")
+            return
+        }
+
         let urlString = "\(baseURL)/\(params.timestamp)"
         guard let url = URL(string: urlString) else {
             Logger.log("Invalid URL")
@@ -36,7 +40,7 @@ class TimelineAPI {
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("HYUNSUB_TOKEN=\(token)", forHTTPHeaderField: "Cookie")
+        request.setValue("Bearer \(deviceKey)", forHTTPHeaderField: "Authorization")
 
         do {
             let encoder = JSONEncoder()
@@ -54,6 +58,9 @@ class TimelineAPI {
 
             if let httpResponse = response as? HTTPURLResponse {
                 Logger.log("Response status code: \(httpResponse.statusCode)")
+                if httpResponse.statusCode == 401 {
+                    Logger.log("Device key rejected by server — 폐기됐다면 다시 등록 필요 (키는 지우지 않음)")
+                }
             }
 
             if let data = data, let responseString = String(data: data, encoding: .utf8) {

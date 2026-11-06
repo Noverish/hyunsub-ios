@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		CE00000100000001LOCATION /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE00000200000002LOCATION /* LocationManager.swift */; };
+		CE00000900000009DEVICEKY /* DeviceKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE00000A0000000ADEVICEKY /* DeviceKeyStore.swift */; };
 		CE00000300000003TIMELINE /* TimelineAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE00000400000004TIMELINE /* TimelineAPI.swift */; };
 		CE00000500000005APPDELEG /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE00000600000006APPDELEG /* AppDelegate.swift */; };
 		CE00000700000007LOGGERXX /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE00000800000008LOGGERXX /* Logger.swift */; };
@@ -40,6 +41,7 @@
 
 /* Begin PBXFileReference section */
 		CE00000200000002LOCATION /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		CE00000A0000000ADEVICEKY /* DeviceKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceKeyStore.swift; sourceTree = "<group>"; };
 		CE00000400000004TIMELINE /* TimelineAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineAPI.swift; sourceTree = "<group>"; };
 		CE00000600000006APPDELEG /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CE00000800000008LOGGERXX /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 				CEAC1FE5297EB47E0027964F /* ContentView.swift */,
 				CE00000200000002LOCATION /* LocationManager.swift */,
 				CE00000400000004TIMELINE /* TimelineAPI.swift */,
+				CE00000A0000000ADEVICEKY /* DeviceKeyStore.swift */,
 				CE00000800000008LOGGERXX /* Logger.swift */,
 				CEAC1FE7297EB4800027964F /* Assets.xcassets */,
 				CEAC1FE9297EB4800027964F /* Preview Content */,
@@ -278,6 +281,7 @@
 				CEAC1FE6297EB47E0027964F /* ContentView.swift in Sources */,
 				CE00000100000001LOCATION /* LocationManager.swift in Sources */,
 				CE00000300000003TIMELINE /* TimelineAPI.swift in Sources */,
+				CE00000900000009DEVICEKY /* DeviceKeyStore.swift in Sources */,
 				CE00000500000005APPDELEG /* AppDelegate.swift in Sources */,
 				CE00000700000007LOGGERXX /* Logger.swift in Sources */,
 				CEAC1FE4297EB47E0027964F /* appsApp.swift in Sources */,
