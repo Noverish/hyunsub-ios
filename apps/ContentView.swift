@@ -40,7 +40,9 @@ struct UIWebView: UIViewRepresentable {
 
 class WebView: WKWebView {
     init() {
-        super.init(frame: CGRect.zero, configuration: WKWebViewConfiguration())
+        let configuration = WKWebViewConfiguration()
+        configuration.userContentController.add(DeviceKeyMessageHandler(), name: DeviceKeyMessageHandler.name)
+        super.init(frame: CGRect.zero, configuration: configuration)
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(reloadWebView(_:)), for: .valueChanged)
         super.scrollView.addSubview(refreshControl)
@@ -65,5 +67,27 @@ class WebView: WKWebView {
     @objc func reloadWebView(_ sender: UIRefreshControl) {
         super.reload()
         sender.endRefreshing()
+    }
+}
+
+/// timeline 웹이 발급받은 위치 업로드 기기 키를 `webkit.messageHandlers.hyunsubDeviceKey.postMessage(key)`로 넘기면 Keychain에 저장한다.
+/// 다른 사이트·iframe이 키를 덮어쓰지 못하도록 timeline 메인 프레임에서 온 메시지만 받는다.
+class DeviceKeyMessageHandler: NSObject, WKScriptMessageHandler {
+    static let name = "hyunsubDeviceKey"
+    private static let allowedHost = "timeline.hyunsub.kim"
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        let origin = message.frameInfo.securityOrigin
+        guard message.frameInfo.isMainFrame, origin.protocol == "https", origin.host == Self.allowedHost else {
+            Logger.log("Device key message ignored: origin=\(origin.protocol)://\(origin.host)")
+            return
+        }
+        guard let key = message.body as? String else {
+            Logger.log("Device key message ignored: body is not a string")
+            return
+        }
+
+        let saved = DeviceKeyStore.shared.save(key)
+        Logger.log("Device key \(saved ? "saved" : "save failed")")
     }
 }
