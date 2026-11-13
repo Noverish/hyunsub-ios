@@ -36,7 +36,7 @@ class TimelineAPI {
 
 ❌ Bad
 ```swift
-private let token = "eyJhbG..."   // ❌ 소스/깃 히스토리에 시크릿 노출
+private let token = "<소스에 박은 토큰 문자열>"   // ❌ 소스/깃 히스토리에 시크릿 노출
 ```
 ✅ Good — Keychain 등에서 주입
 ```swift
