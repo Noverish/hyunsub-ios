@@ -31,7 +31,7 @@ appsTests/  appsUITests/ # XCTest (현재 템플릿 스텁)
 ## Commands
 
 ```bash
-# 빌드 (기기/시뮬레이터)
+# 빌드 (기기/시뮬레이터) — 이 Mac은 xcode-select가 CommandLineTools라 앞에 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer 필요(gotchas)
 xcodebuild -project apps.xcodeproj -scheme apps -destination 'generic/platform=iOS' build
 # 테스트 (시뮬레이터)
 xcodebuild -project apps.xcodeproj -scheme apps -destination 'platform=iOS Simulator,name=iPhone 15' test
@@ -68,7 +68,9 @@ xcodebuild -project apps.xcodeproj -scheme apps -destination 'platform=iOS Simul
 
 1. **시크릿을 소스에 하드코딩하지 않는다.** 위치 업로드 인증은 Keychain의 기기 키(`DeviceKeyStore`)를 쓴다 — 토큰을 소스 상수로 두지 말 것. ([.claude/rules/networking.md](.claude/rules/networking.md), [agent_docs/maps/gotchas.md](agent_docs/maps/gotchas.md))
 2. **위치 권한/백그라운드 전제**: significant-change 모니터링과 백그라운드 위치는 `Info.plist`(권한 문구 + `UIBackgroundModes: location`)와 "Always" 권한에 의존한다. 권한 흐름을 깨지 말 것.
-3. <!-- TODO: 도메인 규칙 — 위치 전송 빈도/배터리 정책, 오프라인 시 버퍼링/재전송 여부, WebView↔네이티브 브리지(JS) 사용 여부 -->
+3. **WebView↔네이티브는 `WKScriptMessageHandler` 브릿지(웹 → 앱)로만** 잇는다. 출처 검사·web과의 계약은 [.claude/rules/architecture.md](.claude/rules/architecture.md)의 "웹 → 앱 메시지 브릿지".
+4. **앱 변경은 `main` 머지로 배포되지 않는다.** 사용자가 Xcode로 기기에 설치해야 반영된다.
+5. <!-- TODO: 도메인 규칙 — 위치 전송 빈도/배터리 정책, 오프라인 시 버퍼링/재전송 여부 -->
 
 ## Tech Stack
 

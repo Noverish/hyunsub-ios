@@ -41,6 +41,7 @@ timeline 웹(`/device`)이 키를 발급받아 `window.webkit.messageHandlers.hy
 기본은 켜짐. 전체 화면에 고정된 페이지(chat 등 `HsShell fixed`)는 웹이 `window.webkit.messageHandlers.hyunsubPullToRefresh.postMessage(false)`로 끄고,
 벗어날 때 `true`로 되돌린다. `PullToRefreshMessageHandler`(ContentView.swift)는 **https://hyunsub.kim·*.hyunsub.kim 메인 프레임** 메시지만 받는다.
 끄면 `scrollView.refreshControl`을 떼고 `bounces`도 꺼서 화면이 끌려 내려오지 않는다. 새 문서가 열리면(`didCommit`) 다시 켜짐으로 돌아간다.
+web 쪽 호출부는 hyunsub-web `src/utils/native-bridge.ts`의 `setPullToRefresh`·`hooks/common/disable-pull-to-refresh.ts`. 핸들러 전체 목록(계약)은 워크스페이스 `agent_docs/overview.md`의 "iOS 앱 ↔ web 브릿지".
 
 권한 변경 시(`locationManagerDidChangeAuthorization`) Always/WhenInUse면 모니터링을 (재)시작한다.
 

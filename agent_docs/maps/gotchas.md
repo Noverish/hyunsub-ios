@@ -15,6 +15,24 @@
 - **문제**: `xcodebuild -scheme apps`가 "scheme not found".
 - **근본 원인**: 스킴이 공유(shared)되지 않고 `apps.xcodeproj/xcuserdata`에만 있다 → 다른 사용자/CI에서 미인식.
 - **수정**: Xcode에서 스킴을 "Shared"로 체크해 `xcshareddata/xcschemes`에 커밋하거나, `xcodebuild -list`로 사용 가능한 스킴 확인.
+- **참고**: 2026-11-14 `xcuserdata`가 없는 새 worktree에서도 `xcodebuild -project apps.xcodeproj -scheme apps …`는 빌드에 성공했다(Xcode가 기본 스킴을 자동으로 만든다). 실제로 안 보일 때만 위 수정을 한다.
+
+## 이 Mac에서 `xcodebuild`가 바로 실패한다
+
+- **문제**: `xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance`.
+- **근본 원인**: `xcode-select`가 Xcode가 아니라 CommandLineTools를 가리킨다. 고치려면 `sudo`가 필요하다.
+- **수정**: 전역 설정은 바꾸지 말고 명령마다 `DEVELOPER_DIR`을 준다.
+  ```bash
+  DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project apps.xcodeproj -scheme apps \
+    -destination 'generic/platform=iOS Simulator' -derivedDataPath "$TMPDIR/apps-dd" build CODE_SIGNING_ALLOWED=NO
+  ```
+  서명 없이 컴파일만 확인하는 명령이다. 기기 설치는 사용자가 Xcode에서 한다.
+
+## Xcode가 `project.pbxproj`를 정렬만 바꿔 놓는다
+
+- **문제**: 메인 체크아웃에 내용 변화 없이 줄 순서만 바뀐 `project.pbxproj` 수정이 생겨 있다(2026-11-14 `DeviceKeyStore.swift` 항목 위치만 바뀜).
+- **근본 원인**: Xcode가 프로젝트를 열고 저장하며 항목을 다시 정렬한다. 사용자가 Xcode를 열어 둔 상태다.
+- **수정**: 에이전트는 그 변경을 커밋하거나 되돌리지 않고 worktree에서 작업한다. 사용자의 Xcode 작업일 수 있다.
 
 ## 백그라운드에서 위치가 안 올라온다
 
