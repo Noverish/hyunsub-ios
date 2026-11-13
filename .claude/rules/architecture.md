@@ -32,7 +32,7 @@ LocationManager.shared (CLLocationManagerDelegate)
 
 ## WebView
 
-- `ContentView`의 `UIViewRepresentable`로 `WKWebView`를 감싼다. 커스텀 UA에 ` Hyunsub/1.0.0` 부착, 당겨서 새로고침, iOS 16.4+에서 `isInspectable`.
+- `ContentView`의 `UIViewRepresentable`로 `WKWebView`를 감싼다. 커스텀 UA에 ` Hyunsub/1.0.0` 부착, 당겨서 새로고침(웹이 `hyunsubPullToRefresh` 메시지로 페이지별 on/off, 새 문서마다 켜짐으로 초기화), iOS 16.4+에서 `isInspectable`.
 
 ## 코드 스타일
 

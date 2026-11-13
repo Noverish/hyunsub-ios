@@ -38,14 +38,20 @@ struct UIWebView: UIViewRepresentable {
     }
 }
 
-class WebView: WKWebView {
+class WebView: WKWebView, WKNavigationDelegate {
+    private let pullToRefreshControl = UIRefreshControl()
+
     init() {
         let configuration = WKWebViewConfiguration()
         configuration.userContentController.add(DeviceKeyMessageHandler(), name: DeviceKeyMessageHandler.name)
+        let pullToRefreshHandler = PullToRefreshMessageHandler()
+        configuration.userContentController.add(pullToRefreshHandler, name: PullToRefreshMessageHandler.name)
         super.init(frame: CGRect.zero, configuration: configuration)
-        let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(reloadWebView(_:)), for: .valueChanged)
-        super.scrollView.addSubview(refreshControl)
+        pullToRefreshHandler.webView = self
+        super.navigationDelegate = self
+
+        pullToRefreshControl.addTarget(self, action: #selector(reloadWebView(_:)), for: .valueChanged)
+        setPullToRefresh(true)
 
         super.allowsBackForwardNavigationGestures = true
         
@@ -67,6 +73,45 @@ class WebView: WKWebView {
     @objc func reloadWebView(_ sender: UIRefreshControl) {
         super.reload()
         sender.endRefreshing()
+    }
+
+    /// 당겨서 새로고침을 켜고 끈다. 끌 때는 당기는 동작 자체(바운스)도 막아 화면이 끌려 내려오지 않게 한다.
+    func setPullToRefresh(_ enabled: Bool) {
+        super.scrollView.refreshControl = enabled ? pullToRefreshControl : nil
+        super.scrollView.bounces = enabled
+    }
+
+    /// 새 문서가 열리면 기본값(켜짐)으로 되돌린다. 끈 화면을 벗어난 뒤에도 꺼진 채 남지 않게 한다.
+    /// 끄고 싶은 화면은 문서가 열린 뒤 웹이 다시 `false`를 보낸다.
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        setPullToRefresh(true)
+    }
+}
+
+/// 웹이 `webkit.messageHandlers.hyunsubPullToRefresh.postMessage(bool)`로 당겨서 새로고침을 켜고 끈다.
+/// 전체 화면에 고정된 페이지(chat 등)는 끌어내리면 화면이 어색하게 밀려 내려와서 끈다.
+/// hyunsub.kim 서비스의 메인 프레임에서 온 메시지만 받는다.
+class PullToRefreshMessageHandler: NSObject, WKScriptMessageHandler {
+    static let name = "hyunsubPullToRefresh"
+    private static let allowedDomain = "hyunsub.kim"
+
+    /// WKUserContentController가 핸들러를 강하게 잡으므로 순환 참조가 생기지 않게 약하게 둔다.
+    weak var webView: WebView?
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        let origin = message.frameInfo.securityOrigin
+        let host = origin.host
+        guard message.frameInfo.isMainFrame, origin.protocol == "https",
+              host == Self.allowedDomain || host.hasSuffix("." + Self.allowedDomain) else {
+            Logger.log("Pull-to-refresh message ignored: origin=\(origin.protocol)://\(host)")
+            return
+        }
+        guard let enabled = message.body as? Bool else {
+            Logger.log("Pull-to-refresh message ignored: body is not a bool")
+            return
+        }
+
+        webView?.setPullToRefresh(enabled)
     }
 }
 

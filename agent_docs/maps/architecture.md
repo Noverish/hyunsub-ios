@@ -15,7 +15,7 @@ appsApp (@main)
 
 | 책임 | 구현 | 비고 |
 |---|---|---|
-| 웹앱 쉘 | `ContentView` → `WKWebView` | `https://apps.hyunsub.kim` 로드, 커스텀 UA `… Hyunsub/1.0.0`, 당겨서 새로고침 |
+| 웹앱 쉘 | `ContentView` → `WKWebView` | `https://apps.hyunsub.kim` 로드, 커스텀 UA `… Hyunsub/1.0.0`, 당겨서 새로고침(웹이 페이지별로 끌 수 있음) |
 | 백그라운드 위치 추적 | `LocationManager` + `TimelineAPI` | significant location change → timeline API PUT |
 
 ## 위치 데이터 흐름
@@ -35,6 +35,12 @@ CLLocationManager (significant changes, 백그라운드)
 timeline 웹(`/device`)이 키를 발급받아 `window.webkit.messageHandlers.hyunsubDeviceKey.postMessage(key)`로 넘기면
 `DeviceKeyMessageHandler`(ContentView.swift)가 **https://timeline.hyunsub.kim 메인 프레임에서 온 메시지만** 받아 `DeviceKeyStore`(Keychain,
 `AfterFirstUnlockThisDeviceOnly`)에 저장한다. 서버는 키의 SHA-256만 보관하고, 키로는 위치 저장(PUT)만 할 수 있다.
+
+## 당겨서 새로고침 켜기/끄기 (웹뷰 → 네이티브)
+
+기본은 켜짐. 전체 화면에 고정된 페이지(chat 등 `HsShell fixed`)는 웹이 `window.webkit.messageHandlers.hyunsubPullToRefresh.postMessage(false)`로 끄고,
+벗어날 때 `true`로 되돌린다. `PullToRefreshMessageHandler`(ContentView.swift)는 **https://hyunsub.kim·*.hyunsub.kim 메인 프레임** 메시지만 받는다.
+끄면 `scrollView.refreshControl`을 떼고 `bounces`도 꺼서 화면이 끌려 내려오지 않는다. 새 문서가 열리면(`didCommit`) 다시 켜짐으로 돌아간다.
 
 권한 변경 시(`locationManagerDidChangeAuthorization`) Always/WhenInUse면 모니터링을 (재)시작한다.
 
