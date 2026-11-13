@@ -36,3 +36,9 @@ xcodebuild -project apps.xcodeproj -scheme apps -destination 'platform=iOS Simul
 ```
 
 <!-- TODO: 서명 방식(자동/수동, 프로비저닝 프로파일), 배포 채널(TestFlight/Ad-hoc), App Store 메타데이터 관리 주체. CI가 없으므로 릴리스는 수동 Xcode Archive로 추정 -->
+
+## 앱 아이콘·스플래시
+
+- **앱 아이콘**(`Assets.xcassets/AppIcon.appiconset/*.png`, 알파 없는 RGB)과 **스플래시 이미지**(`hyunsub_spash.imageset/hyunsub_spash.png`, 1290×2796, 보라 그라데이션 전체 + 가운데 흰 `fa-instalod`)는 손으로 만들지 않고 web repo의 `scripts/brand/generate.mjs --ios <Assets.xcassets 경로>`가 만든다(사용법은 스크립트 머리 주석, 디자인 규칙은 web design-system.md "서비스 로고와 favicon").
+- `LaunchScreen.storyboard`는 이 이미지를 전체 화면에 `scaleAspectFill`로 깐다. 기기 비율이 달라도 가운데 글리프는 유지된다.
+- iOS는 런치 스크린을 캐시한다. 바뀐 스플래시가 안 보이면 앱을 지우고 다시 설치한다.
