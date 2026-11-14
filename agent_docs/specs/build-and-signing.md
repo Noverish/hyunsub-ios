@@ -27,6 +27,15 @@
 | `UIBackgroundModes` | `[location]` | 백그라운드 위치 |
 | `NSAppTransportSecurity.NSAllowsArbitraryLoads` | `true` | ATS 비활성(임의 HTTP) |
 
+## 엔타이틀먼트
+
+| 파일 | 키 | 값 | 의미 |
+|---|---|---|---|
+| `apps/apps.entitlements` (`CODE_SIGN_ENTITLEMENTS`, Debug·Release) | `com.apple.developer.associated-domains` | `webcredentials:auth.hyunsub.kim` | WKWebView 안에서 auth 로그인 화면의 **패스키(Face ID 로그인)**를 쓸 수 있게 한다 |
+
+- 짝: 서버 `https://auth.hyunsub.kim/.well-known/apple-app-site-association`(hyunsub-api `hyunsub-auth/etc/auth.conf`)이 `28A4E58A28.kim.hyunsub.apps`를 허락한다. 팀 ID나 번들 ID가 바뀌면 두 곳을 같이 고친다.
+- Associated Domains는 **유료 Apple Developer Program 팀**에서만 서명된다. Automatic 서명이면 Xcode가 App ID에 capability를 켜고 프로파일을 다시 만든다.
+
 ## 빌드 명령
 
 ```bash
