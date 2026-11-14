@@ -51,3 +51,11 @@
 - 위치 전송 실패 시 재시도/버퍼링 없음 — 유실 허용 여부
 - WKWebView 캐시 정책(returnCacheDataElseLoad)으로 오래된 웹앱이 뜰 가능성
 -->
+
+## 앱 안에서 Face ID(패스키) 로그인이 안 뜬다
+
+WKWebView는 앱이 그 도메인의 Associated Domains(`webcredentials:auth.hyunsub.kim`)를 가지고 있을 때만 WebAuthn(패스키)을 허용한다. 안 되면 순서대로 본다.
+
+1. 설치한 빌드가 `apps.entitlements`를 넣고 **유료 팀으로 서명**됐는지(무료 Personal Team은 Associated Domains를 못 쓴다).
+2. `curl https://auth.hyunsub.kim/.well-known/apple-app-site-association`이 200 + JSON인지. Apple은 이 파일을 **CDN으로 캐시**해서 서버를 고친 뒤 반영까지 시간이 걸린다. 개발 중에는 엔타이틀먼트 값을 `webcredentials:auth.hyunsub.kim?mode=developer`로 바꾸고 기기 설정 → 개발자 → Associated Domains Development를 켜면 CDN을 건너뛴다(커밋하지 말 것).
+3. Safari에서는 되는데 앱에서만 안 되면 1·2 문제다. 웹 코드 문제가 아니다.
