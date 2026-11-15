@@ -38,7 +38,7 @@ struct UIWebView: UIViewRepresentable {
     }
 }
 
-class WebView: WKWebView, WKNavigationDelegate {
+class WebView: WKWebView, WKNavigationDelegate, WKUIDelegate {
     private let pullToRefreshControl = UIRefreshControl()
 
     init() {
@@ -49,6 +49,7 @@ class WebView: WKWebView, WKNavigationDelegate {
         super.init(frame: CGRect.zero, configuration: configuration)
         pullToRefreshHandler.webView = self
         super.navigationDelegate = self
+        super.uiDelegate = self
 
         pullToRefreshControl.addTarget(self, action: #selector(reloadWebView(_:)), for: .valueChanged)
         setPullToRefresh(true)
@@ -85,6 +86,50 @@ class WebView: WKWebView, WKNavigationDelegate {
     /// 끄고 싶은 화면은 문서가 열린 뒤 웹이 다시 `false`를 보낸다.
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
         setPullToRefresh(true)
+    }
+
+    // MARK: - JavaScript 대화상자
+    // WKUIDelegate가 없으면 window.alert/confirm/prompt가 조용히 무시된다(confirm은 false, prompt는 null).
+    // 그러면 패스키 삭제처럼 confirm을 거치는 버튼이 아무 반응이 없다. 네이티브 창으로 대신 보여 준다.
+
+    func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default) { _ in completionHandler() })
+        present(alert, completion: completionHandler)
+    }
+
+    func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel) { _ in completionHandler(false) })
+        alert.addAction(UIAlertAction(title: "확인", style: .default) { _ in completionHandler(true) })
+        present(alert) { completionHandler(false) }
+    }
+
+    func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?,
+                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
+        let alert = UIAlertController(title: nil, message: prompt, preferredStyle: .alert)
+        alert.addTextField { $0.text = defaultText }
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel) { _ in completionHandler(nil) })
+        alert.addAction(UIAlertAction(title: "확인", style: .default) { _ in
+            completionHandler(alert.textFields?.first?.text)
+        })
+        present(alert) { completionHandler(nil) }
+    }
+
+    /// 가장 위에 떠 있는 화면에 띄운다. 띄울 곳이 없으면 [fallback]을 불러 JS가 멈춰 있지 않게 한다.
+    private func present(_ alert: UIAlertController, completion fallback: @escaping () -> Void) {
+        let scene = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first
+        var top = scene?.windows.first(where: { $0.isKeyWindow })?.rootViewController
+        while let presented = top?.presentedViewController {
+            top = presented
+        }
+        guard let top = top else {
+            fallback()
+            return
+        }
+        top.present(alert, animated: true)
     }
 }
 
