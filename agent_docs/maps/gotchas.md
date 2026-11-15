@@ -17,6 +17,12 @@
 - **수정**: Xcode에서 스킴을 "Shared"로 체크해 `xcshareddata/xcschemes`에 커밋하거나, `xcodebuild -list`로 사용 가능한 스킴 확인.
 - **참고**: 2026-11-14 `xcuserdata`가 없는 새 worktree에서도 `xcodebuild -project apps.xcodeproj -scheme apps …`는 빌드에 성공했다(Xcode가 기본 스킴을 자동으로 만든다). 실제로 안 보일 때만 위 수정을 한다.
 
+## 웹의 `alert`/`confirm`/`prompt`가 무반응이다
+
+- **문제**: 웹 화면의 `window.confirm`을 거치는 버튼(예: 내 정보의 패스키 삭제)이 앱에서 눌러도 아무 반응이 없었다(2026-11-15).
+- **근본 원인**: `WKWebView`는 `WKUIDelegate`가 없으면 JS 대화상자를 조용히 무시한다(`confirm`→`false`, `prompt`→`null`, `alert`→무시).
+- **수정**: `WebView`가 `WKUIDelegate`를 구현해 `UIAlertController`로 보여 준다(`ContentView.swift`, #9). **앱을 다시 설치해야 반영된다.** web 쪽 규칙은 hyunsub-web `.claude/rules/components-and-styling.md`.
+
 ## 이 Mac에서 `xcodebuild`가 바로 실패한다
 
 - **문제**: `xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory '/Library/Developer/CommandLineTools' is a command line tools instance`.
